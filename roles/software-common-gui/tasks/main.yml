@@ -68,3 +68,60 @@
     classic: true
   when: (install_all_optionals.user_input | bool) or
     (install_keepassxc.user_input | bool)
+
+# KDENLIVE INSTALL
+- name: install kdenlive check
+  pause:
+    prompt: "Install Kdenlive (yes/no)?"
+  register: install_kdenlive
+  when: not install_all_optionals.user_input | bool
+
+- name: install kdenlive
+  apt:
+    pkg:
+      - kdenlive
+  when: (install_all_optionals.user_input | bool) or
+    (install_kdenlive.user_input | bool)
+
+# GIMP INSTALL
+- name: install gimp check
+  pause:
+    prompt: "Install GIMP (yes/no)?"
+  register: install_gimp
+  when: not install_all_optionals.user_input | bool
+
+- name: install gimp
+  apt:
+    pkg:
+      - gimp
+  when: (install_all_optionals.user_input | bool) or
+    (install_gimp.user_input | bool)
+
+# PEEK INSTALL
+- name: install peek check
+  pause:
+    prompt: "Install Peek (yes/no)?"
+  register: install_peek
+  when: not install_all_optionals.user_input | bool
+
+- name: install peek
+  apt:
+    pkg:
+      - peek
+  when: (install_all_optionals.user_input | bool) or
+    (install_peek.user_input | bool)
+
+# REDSHIFT INSTALL
+- name: install redshift check
+  pause:
+    prompt: "Install Redshift (yes/no)?"
+  register: install_redshift
+  when: not install_all_optionals.user_input | bool
+
+- name: install redshift
+  apt:
+    pkg:
+      - redshift
+      - plasma-applet-redshift-control
+  when: (install_all_optionals.user_input | bool) or
+    (install_redshift.user_input | bool)
