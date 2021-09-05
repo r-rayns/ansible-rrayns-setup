@@ -1,0 +1,9 @@
+---
+# tasks file for software-common-non-gui
+- name: install common packages
+  apt:
+    pkg:
+      - vim
+      - tmux
+      - python3-venv
+      - curl

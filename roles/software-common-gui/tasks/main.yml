@@ -1,0 +1,70 @@
+---
+# tasks file for software-common-gui
+- name: install optionals check
+  pause:
+    prompt: "Install all optionals? (yes/no)?"
+  register: install_all_optionals
+
+# CHROMIUM INSTALL
+- name: install chromium-browser check
+  pause:
+    prompt: "Install chromium-browser (yes/no)?"
+  register: install_chromium
+  when: not install_all_optionals.user_input | bool
+
+- name: install chromium-browser
+  apt:
+    pkg:
+      - chromium-browser
+  when: (install_all_optionals.user_input | bool) or
+    (install_chromium.user_input | bool)
+
+# VSCODE INSTALL
+- name: install vscode check
+  pause:
+    prompt: "Install vscode (yes/no)?"
+  register: install_vscode
+  when: not install_all_optionals.user_input | bool
+
+- name: install vscode
+  snap:
+    name: code
+    classic: true
+  when: (install_all_optionals.user_input | bool) or
+    (install_vscode.user_input | bool)
+
+- name: post vscode install
+  debug:
+    msg:
+      - "To install the Ansible linter for vscode follow this guide:"
+      - "https://github.com/ansible-community/vscode-ansible/blob/4925e3393ddce2554ac346a17a04118d668a609c/doc/topics/integrate_ansible-lint_in_venv/linux.md"
+  when: (install_all_optionals.user_input | bool) or
+    (install_vscode.user_input | bool)
+
+# SPOTIFY INSTALL
+- name: install spotify check
+  pause:
+    prompt: "Install Spotify (yes/no)?"
+  register: install_spotify
+  when: not install_all_optionals.user_input | bool
+
+- name: install spotify
+  snap:
+    name: spotify
+    classic: true
+  when: (install_all_optionals.user_input | bool) or
+    (install_spotify.user_input | bool)
+
+# KEEPASSXC INSTALL
+- name: install keepassxc check
+  pause:
+    prompt: "Install KeePassXC (yes/no)?"
+  register: install_keepassxc
+  when: not install_all_optionals.user_input | bool
+
+- name: install keepassxc
+  snap:
+    name: keepassxc
+    classic: true
+  when: (install_all_optionals.user_input | bool) or
+    (install_keepassxc.user_input | bool)

@@ -1,0 +1,72 @@
+---
+# tasks file for languages
+- name: install Go check
+  pause:
+    prompt: "Install Go(v1.17)? (yes/no)?"
+  register: install_go
+
+- name: download Go language
+  become: yes
+  become_user: '{{ default_user }}'
+  get_url:
+    url: https://golang.org/dl/go1.17.linux-amd64.tar.gz
+    dest: '/home/{{ default_user }}/Downloads/go1.17.linux-amd64.tar.gz'
+    validate_certs: true
+    checksum: sha256:6bf89fc4f5ad763871cf7eac80a2d594492de7a818303283f1366a7f6a30372d
+  when: install_go.user_input | bool
+
+- name: remove previous Go installation
+  file:
+    state: absent
+    path: /usr/local/go
+  when: install_go.user_input | bool
+
+- name: install Go
+  unarchive:
+    src: '/home/{{ default_user }}/Downloads/go1.17.linux-amd64.tar.gz'
+    dest: /usr/local/
+    owner: root
+    group: root
+  when: install_go.user_input | bool
+
+- name: check for GOROOT in .zshenv
+  become: yes
+  become_user: '{{ default_user }}'
+  lineinfile:
+    path: /home/{{ default_user }}/.zshenv
+    line: 'export GOROOT'
+    state: present
+    create: yes
+  check_mode: yes
+  register: goroot_present
+  when: install_go.user_input | bool
+
+- name: add GOROOT to .zshenv
+  become: yes
+  become_user: '{{ default_user }}'
+  lineinfile:
+    path: /home/{{ default_user }}/.zshenv
+    line: 'export GOROOT=/usr/local/go'
+    create: yes
+  when: (install_go.user_input | bool) and 
+    (not goroot_present | bool)
+
+- name: add GOROOT to $PATH
+  become: yes
+  become_user: '{{ default_user }}'
+  lineinfile:
+    path: /home/{{ default_user }}/.zshenv
+    line: 'export PATH=$PATH:$GOROOT/bin'
+  when: (install_go.user_input | bool) and 
+    (not goroot_present | bool)
+  
+- name: install Node Version Manager check
+  pause:
+    prompt: "Install Node Version Manager? (yes/no)?"
+  register: install_nvm
+
+- name: download and run the NVM(v0.38.0) install script
+  become: yes
+  become_user: '{{ default_user }}'
+  shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | zsh
+  when: install_nvm.user_input | bool

@@ -1,0 +1,18 @@
+---
+# general vars
+default_user: 'username'
+# vars for gantsign.antigen role
+antigen_version: '2.0.2'
+users:
+  - username: 'username'
+    antigen_libraries:
+      - name: oh-my-zsh
+    antigen_theme:
+      name: robbyrussell
+    antigen_bundles:
+      - name: git
+      - name: pip
+      - name: command-not-found
+      # Syntax highlighting bundle.
+      - name: zsh-syntax-highlighting  # `name` is required (any valid file name will do so long as it's unique for the bundles)
+        url: zsh-users/zsh-syntax-highlighting
