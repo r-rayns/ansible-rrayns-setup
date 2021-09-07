@@ -13,7 +13,7 @@
     repo: https://github.com/tmux-plugins/tpm
     dest: ~/.tmux/plugins/tpm
 
-- name: create conf file with plugins
+- name: create Tmux conf file with plugins
   copy:
     dest: ~/.tmux.conf
     content: |
