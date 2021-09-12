@@ -125,3 +125,17 @@
       - plasma-applet-redshift-control
   when: (install_all_optionals.user_input | bool) or
     (install_redshift.user_input | bool)
+
+# YAKUAKE INSTALL
+- name: install yakuake check
+  pause:
+    prompt: "Install Yakuake (yes/no)?"
+  register: install_yakuake
+  when: not install_all_optionals.user_input | bool
+
+- name: install yakuake
+  apt:
+    pkg:
+      - yakuake
+  when: (install_all_optionals.user_input | bool) or
+    (install_yakuake.user_input | bool)
