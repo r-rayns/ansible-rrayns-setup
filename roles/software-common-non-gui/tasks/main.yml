@@ -7,6 +7,8 @@
       - tmux
       - python3-venv
       - curl
+      - gcc
+      - build-essential
 
 - name: clone Tmux plugin manager
   git:

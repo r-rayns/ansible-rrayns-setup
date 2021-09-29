@@ -2,7 +2,7 @@
 # tasks file for languages
 - name: install Go check
   pause:
-    prompt: "Install Go(v1.17)? (yes/no)?"
+    prompt: "Install Go(v1.17)? (yes/no)"
   register: install_go
 
 - name: download Go language
@@ -62,7 +62,7 @@
   
 - name: install Node Version Manager check
   pause:
-    prompt: "Install Node Version Manager? (yes/no)?"
+    prompt: "Install Node Version Manager? (yes/no)"
   register: install_nvm
 
 - name: download and run the NVM(v0.38.0) install script
@@ -70,3 +70,15 @@
   become_user: '{{ default_user }}'
   shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | zsh
   when: install_nvm.user_input | bool
+
+- name: install Python2 check
+  pause:
+    prompt: "Install Python2? (yes/no)"
+  register: install_python2
+
+- name: install Python2
+  apt:
+    pkg:
+      - python2
+  when: install_python2.user_input | bool
+  
