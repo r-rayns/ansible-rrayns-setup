@@ -139,3 +139,17 @@
       - yakuake
   when: (install_all_optionals.user_input | bool) or
     (install_yakuake.user_input | bool)
+
+# INSOMNIA INSTALL
+- name: install insomnia check
+  pause:
+    prompt: "Install Insomnia (yes/no)?"
+  register: install_insomnia
+  when: not install_all_optionals.user_input | bool
+
+- name: install insomnia
+  snap:
+    name: insomnia
+    classic: true
+  when: (install_all_optionals.user_input | bool) or
+    (install_insomnia.user_input | bool)
