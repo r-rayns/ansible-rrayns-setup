@@ -1,0 +1,10 @@
+---
+# tasks file for keychron-k2
+- name: ⌨ set fnmode to 2 (function keys before media keys)
+  blockinfile:
+    dest: /etc/modprobe.d/hid_apple.conf
+    block: |
+      # Use function keys by default. Press Fn to use multimedia keys.
+      options hid_apple fnmode=2
+    create: yes
+

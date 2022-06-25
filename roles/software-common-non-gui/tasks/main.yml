@@ -9,6 +9,7 @@
       - curl
       - gcc
       - build-essential
+      - aspell
 
 - name: clone Tmux plugin manager
   git:
@@ -19,9 +20,11 @@
   copy:
     dest: ~/.tmux.conf
     content: |
+      set-option -g status-position top
+      set-option -g repeat-time 0
       # List of plugins
       set -g @plugin 'tmux-plugins/tpm'
       set -g @plugin 'tmux-plugins/tmux-sensible'
       set -g @plugin 'tmux-plugins/tmux-resurrect'
-      # Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+      # Initialize TMUX plugin manager (TPM) - (keep this line at the very bottom of tmux.conf)
       run '~/.tmux/plugins/tpm/tpm'

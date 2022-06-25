@@ -1,2 +1,2 @@
-# Ansible dev environment setup script
-The Ansible script I use to setup my dev envirionment in Kubuntu
+# Environment setup script
+Ansible script to setup my environment in Kubuntu

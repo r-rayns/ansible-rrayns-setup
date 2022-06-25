@@ -1,0 +1,8 @@
+---
+# tasks file for aliases
+- name: add alias for spellcheck
+  lineinfile:
+    path: /home/{{ default_user }}/.zshrc
+    line: 'alias spck=''function _spck(){ echo "$1" | aspell -a };_spck'''
+    create: yes
+

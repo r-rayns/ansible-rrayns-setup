@@ -5,9 +5,22 @@
   roles:
     - role: software-common-non-gui
       tags: non-gui
+
     - role: gantsign.antigen
       tags: zsh
+
+    - role: zsh-theme-p10k
+      dependencies: gantsign.antigen
+      tags: zsh-theme
+
     - role: software-common-gui
       tags: gui
+
     - role: languages
       tags: langs
+
+    - role: aliases
+      tags: aliases
+
+    - role: keychron-k2
+      tags: keyboard

@@ -7,5 +7,9 @@
         {%- endfor -%}
         {{ "\n" }}
     {%- endif -%}
-    antigen theme {{ (antigen_theme.url | default(antigen_theme.name)) | quote }}
+    {% if 'url' not in antigen_theme -%}
+        antigen theme {{ antigen_theme.name | quote }}
+    {%- else -%}
+        antigen theme {{ antigen_theme.url + ' ' + antigen_theme.name }}
+    {%- endif %}
 {%- endif %}

@@ -6,7 +6,7 @@
   register: install_go
 
 - name: download Go language
-  become: yes
+  become: true
   become_user: '{{ default_user }}'
   get_url:
     url: https://golang.org/dl/go1.17.linux-amd64.tar.gz
@@ -30,7 +30,7 @@
   when: install_go.user_input | bool
 
 - name: check for GOROOT in .zshenv
-  become: yes
+  become: true
   become_user: '{{ default_user }}'
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
@@ -42,7 +42,7 @@
   when: install_go.user_input | bool
 
 - name: add GOROOT to .zshenv
-  become: yes
+  become: true
   become_user: '{{ default_user }}'
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
@@ -52,7 +52,7 @@
     (not goroot_present | bool)
 
 - name: add GOROOT to $PATH
-  become: yes
+  become: true
   become_user: '{{ default_user }}'
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
@@ -66,7 +66,7 @@
   register: install_nvm
 
 - name: download and run the NVM(v0.38.0) install script
-  become: yes
+  become: true
   become_user: '{{ default_user }}'
   shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | zsh
   when: install_nvm.user_input | bool
