@@ -14,3 +14,5 @@ users:
       # Syntax highlighting bundle.
       - name: zsh-syntax-highlighting  # `name` is required (any valid file name will do so long as it's unique for the bundles)
         url: zsh-users/zsh-syntax-highlighting
+      - name: zsh-z
+        url: agkozak/zsh-z
