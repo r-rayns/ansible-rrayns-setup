@@ -1,35 +1,35 @@
 ---
 # tasks file for languages
-- name: install Go check
+- name: Install Go check
   pause:
-    prompt: "Install Go(v1.17)? (yes/no)"
+    prompt: "Install Go(v1.22)? (yes/no)"
   register: install_go
 
-- name: download Go language
+- name: Download Go language
   become: true
   become_user: '{{ default_user }}'
   get_url:
-    url: https://golang.org/dl/go1.17.linux-amd64.tar.gz
-    dest: '/home/{{ default_user }}/Downloads/go1.17.linux-amd64.tar.gz'
+    url: https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
+    dest: '/home/{{ default_user }}/Downloads/go1.22.2.linux-amd64.tar.gz'
     validate_certs: true
-    checksum: sha256:6bf89fc4f5ad763871cf7eac80a2d594492de7a818303283f1366a7f6a30372d
+    checksum: sha256:5901c52b7a78002aeff14a21f93e0f064f74ce1360fce51c6ee68cd471216a17
   when: install_go.user_input | bool
 
-- name: remove previous Go installation
+- name: Remove previous Go installation
   file:
     state: absent
     path: /usr/local/go
   when: install_go.user_input | bool
 
-- name: install Go
+- name: Install Go
   unarchive:
-    src: '/home/{{ default_user }}/Downloads/go1.17.linux-amd64.tar.gz'
+    src: '/home/{{ default_user }}/Downloads/go1.22.2.linux-amd64.tar.gz'
     dest: /usr/local/
     owner: root
     group: root
   when: install_go.user_input | bool
 
-- name: check for GOROOT in .zshenv
+- name: Check for GOROOT in .zshenv
   become: true
   become_user: '{{ default_user }}'
   lineinfile:
@@ -41,7 +41,7 @@
   register: goroot_present
   when: install_go.user_input | bool
 
-- name: add GOROOT to .zshenv
+- name: Add GOROOT to .zshenv
   become: true
   become_user: '{{ default_user }}'
   lineinfile:
@@ -51,7 +51,7 @@
   when: (install_go.user_input | bool) and 
     (not goroot_present | bool)
 
-- name: add GOROOT to $PATH
+- name: Add GOROOT to $PATH
   become: true
   become_user: '{{ default_user }}'
   lineinfile:
@@ -60,23 +60,38 @@
   when: (install_go.user_input | bool) and 
     (not goroot_present | bool)
   
-- name: install Node Version Manager check
+- name: Install Node Version Manager (NVM) check
   pause:
     prompt: "Install Node Version Manager? (yes/no)"
   register: install_nvm
 
-- name: download and run the NVM(v0.38.0) install script
-  become: true
-  become_user: '{{ default_user }}'
-  shell: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | zsh
+- name: Install NVM
   when: install_nvm.user_input | bool
+  block:
+    - name: Download NVM(v0.39.7) installation script
+      get_url:
+        url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh
+        dest: /home/{{ default_user }}/install_nvm.sh
+        mode: '0755'
 
-- name: install Python2 check
+    - name: Run NVM installation script
+      become: true
+      become_user: "{{ default_user }}"
+      shell: ~/install_nvm.sh
+
+    - name: Remove NVM installer script
+      become: true
+      become_user: "{{ default_user }}"
+      file:
+        path: "~/install_nvm.sh"
+        state: absent
+
+- name: Install Python2 check
   pause:
     prompt: "Install Python2? (yes/no)"
   register: install_python2
 
-- name: install Python2
+- name: Install Python2
   apt:
     pkg:
       - python2

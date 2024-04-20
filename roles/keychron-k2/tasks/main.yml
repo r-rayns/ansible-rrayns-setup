@@ -8,3 +8,14 @@
       options hid_apple fnmode=2
     create: yes
 
+- name: update initramfs to apply HID Apple keyboard configuration changes
+  become: true
+  command: update-initramfs -u -k all
+  # The 'update-initramfs' command updates the initial RAM file system (initramfs)
+  # with the latest kernel modules and drivers, including the changes made to
+  # the 'hid_apple.conf' file. This ensures that the updated settings for the
+  # HID Apple keyboard are available to the system when it boots up.
+
+- name: reboot for changes to take effect
+  debug:
+    msg: "Please restart your computer to apply the changes."

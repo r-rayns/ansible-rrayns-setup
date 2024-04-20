@@ -1,0 +1,57 @@
+---
+- name: Install Zsh
+  apt:
+    pkg:
+      - zsh
+
+- name: Set Zsh as the default shell
+  become: true
+  shell: chsh -s /bin/zsh "{{ default_user }}"
+
+- name: Add fix for snap apps to zprofile
+  become: true
+  blockinfile:
+    path: /etc/zsh/zprofile
+    marker: "# {mark} ANSIBLE MANAGED BLOCK fix snap apps not showing in launcher"
+    block: |
+      # fix snap apps not showing in launcher
+      emulate sh -c "source /etc/profile.d/apps-bin-path.sh"
+
+- name: Clone Antidote repository
+  become: true
+  become_user: "{{ default_user }}"
+  git:
+    repo: https://github.com/mattmc3/antidote.git
+    dest: "~/.antidote"
+    depth: 1
+
+- name: Add Antidote initialisation to zshrc
+  become: true
+  become_user: "{{ default_user }}"
+  blockinfile:
+    path: "~/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Add antidote initialisation to zshrc"
+    block: |
+      # source antidote
+      source ~/.antidote/antidote.zsh
+      # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
+      antidote load
+      # set prompt to powerlevel10k
+      autoload -Uz promptinit && promptinit && prompt powerlevel10k
+    create: yes
+
+- name: Create Antidote plugin file
+  become: true
+  become_user: "{{ default_user }}"
+  blockinfile:
+    path: "~/.zsh_plugins.txt"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Antidote Plugins"
+    block: |
+      # frameworks
+      ohmyzsh/ohmyzsh path:lib
+      ohmyzsh/ohmyzsh path:plugins/colored-man-pages
+      # prompt plugins
+      romkatv/powerlevel10k kind:fpath
+      # utils
+      agkozak/zsh-z
+    create: yes

@@ -6,13 +6,6 @@
     - role: software-common-non-gui
       tags: non-gui
 
-    - role: gantsign.antigen
-      tags: zsh
-
-    - role: zsh-theme-p10k
-      dependencies: gantsign.antigen
-      tags: zsh-theme
-
     - role: software-common-gui
       tags: gui
 
@@ -24,3 +17,6 @@
 
     - role: keychron-k2
       tags: keyboard
+
+    - role: zsh-antidote
+      tags: antidote

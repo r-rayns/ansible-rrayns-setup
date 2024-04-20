@@ -1,18 +1,89 @@
 ---
 # tasks file for software-common-gui
-- name: install optionals check
+- name: Install optionals check
   pause:
     prompt: "Install all optionals? (yes/no)?"
   register: install_all_optionals
 
+# KITTY TERMINAL INSTALL
+- name: Install Kitty check
+  pause:
+    prompt: "Install kitty terminal (yes/no)?"
+  register: install_kitty
+  when: not install_all_optionals.user_input | bool
+
+- name: Install Kitty terminal
+  when: (install_all_optionals.user_input | bool) or
+    (install_kitty.user_input | bool)
+  block:
+  
+    - name: Download Kitty installer script
+      get_url:
+        url: https://sw.kovidgoyal.net/kitty/installer.sh
+        dest: "/home/{{ default_user }}/installer.sh"
+        mode: '0755'
+
+    - name: Run Kitty installer script
+      become: true
+      become_user: "{{ default_user }}"
+      shell: "~/installer.sh"
+
+    - name: Ensure ~/.local/bin/ directory exists
+      become: true
+      become_user: "{{ default_user }}"
+      file:
+        path: "~/.local/bin/"
+        state: directory
+
+    - name: Create symbolic links for Kitty and Kitten executables
+      become: true
+      become_user: "{{ default_user }}"
+      file:
+        src: "~/.local/kitty.app/bin/{{ item }}"
+        dest: "~/.local/bin/{{ item }}"
+        state: link
+      loop:
+        - kitty
+        - kitten
+
+    - name: Copy the kitty.desktop file to ~/.local/share/applications so it can be found by the OS
+      become: true
+      become_user: "{{ default_user }}"
+      copy:
+        src: "/home/{{ default_user }}/.local/kitty.app/share/applications/kitty.desktop"
+        dest: "/home/{{ default_user }}/.local/share/applications/"
+
+    - name: Modify kitty.desktop with the correct icon path
+      become: true
+      become_user: "{{ default_user }}"
+      replace:
+        path: "~/.local/share/applications/kitty.desktop"
+        regexp: 'Icon=kitty'
+        replace: 'Icon=/home/{{ default_user }}/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png'
+
+    - name: Modify kitty.desktop with the correct exec path
+      become: true
+      become_user: "{{ default_user }}"
+      replace:
+        path: "~/.local/share/applications/kitty.desktop"
+        regexp: 'Exec=kitty'
+        replace: 'Exec=/home/{{ default_user }}/.local/kitty.app/bin/kitty'
+
+    - name: Remove downloaded installer script
+      become: true
+      become_user: "{{ default_user }}"
+      file:
+        path: "~/installer.sh"
+        state: absent
+
 # CHROMIUM INSTALL
-- name: install chromium-browser check
+- name: Install Chromium check
   pause:
     prompt: "Install chromium-browser (yes/no)?"
   register: install_chromium
   when: not install_all_optionals.user_input | bool
 
-- name: install chromium-browser
+- name: Install Chromium
   apt:
     pkg:
       - chromium-browser
@@ -20,20 +91,20 @@
     (install_chromium.user_input | bool)
 
 # VSCODE INSTALL
-- name: install vscode check
+- name: Install Visual Studio Code check
   pause:
     prompt: "Install vscode (yes/no)?"
   register: install_vscode
   when: not install_all_optionals.user_input | bool
 
-- name: install vscode
+- name: Install Visual Studio Code
   snap:
     name: code
     classic: true
   when: (install_all_optionals.user_input | bool) or
     (install_vscode.user_input | bool)
 
-- name: post vscode install
+- name: Post Visual Studio Code install
   debug:
     msg:
       - "To install the Ansible linter for vscode follow this guide:"
@@ -42,13 +113,13 @@
     (install_vscode.user_input | bool)
 
 # SPOTIFY INSTALL
-- name: install spotify check
+- name: Install Spotify check
   pause:
     prompt: "Install Spotify (yes/no)?"
   register: install_spotify
   when: not install_all_optionals.user_input | bool
 
-- name: install spotify
+- name: Install Spotify
   snap:
     name: spotify
     classic: true
@@ -56,13 +127,13 @@
     (install_spotify.user_input | bool)
 
 # KEEPASSXC INSTALL
-- name: install keepassxc check
+- name: Install KeepassXC check
   pause:
     prompt: "Install KeePassXC (yes/no)?"
   register: install_keepassxc
   when: not install_all_optionals.user_input | bool
 
-- name: install keepassxc
+- name: Install KeepassXC
   snap:
     name: keepassxc
     classic: true
@@ -70,13 +141,13 @@
     (install_keepassxc.user_input | bool)
 
 # KDENLIVE INSTALL
-- name: install kdenlive check
+- name: Install Kdenlive check
   pause:
     prompt: "Install Kdenlive (yes/no)?"
   register: install_kdenlive
   when: not install_all_optionals.user_input | bool
 
-- name: install kdenlive
+- name: Install Kdenlive
   apt:
     pkg:
       - kdenlive
@@ -84,13 +155,13 @@
     (install_kdenlive.user_input | bool)
 
 # GIMP INSTALL
-- name: install gimp check
+- name: Install GIMP check
   pause:
     prompt: "Install GIMP (yes/no)?"
   register: install_gimp
   when: not install_all_optionals.user_input | bool
 
-- name: install gimp
+- name: Install GIMP
   apt:
     pkg:
       - gimp
@@ -98,42 +169,27 @@
     (install_gimp.user_input | bool)
 
 # PEEK INSTALL
-- name: install peek check
+- name: Install Peek check
   pause:
     prompt: "Install Peek (yes/no)?"
   register: install_peek
   when: not install_all_optionals.user_input | bool
 
-- name: install peek
+- name: Install Peek
   apt:
     pkg:
       - peek
   when: (install_all_optionals.user_input | bool) or
     (install_peek.user_input | bool)
 
-# REDSHIFT INSTALL
-- name: install redshift check
-  pause:
-    prompt: "Install Redshift (yes/no)?"
-  register: install_redshift
-  when: not install_all_optionals.user_input | bool
-
-- name: install redshift
-  apt:
-    pkg:
-      - redshift
-      - plasma-applet-redshift-control
-  when: (install_all_optionals.user_input | bool) or
-    (install_redshift.user_input | bool)
-
 # YAKUAKE INSTALL
-- name: install yakuake check
+- name: Install Yakuake check
   pause:
     prompt: "Install Yakuake (yes/no)?"
   register: install_yakuake
   when: not install_all_optionals.user_input | bool
 
-- name: install yakuake
+- name: Install Yakuake
   apt:
     pkg:
       - yakuake
@@ -141,13 +197,13 @@
     (install_yakuake.user_input | bool)
 
 # INSOMNIA INSTALL
-- name: install insomnia check
+- name: Install Insomnia check
   pause:
     prompt: "Install Insomnia (yes/no)?"
   register: install_insomnia
   when: not install_all_optionals.user_input | bool
 
-- name: install insomnia
+- name: Install Insomnia
   snap:
     name: insomnia
     classic: true
