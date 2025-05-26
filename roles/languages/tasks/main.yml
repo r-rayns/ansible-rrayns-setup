@@ -2,17 +2,17 @@
 # tasks file for languages
 - name: Install Go check
   pause:
-    prompt: "Install Go(v1.22)? (yes/no)"
+    prompt: "Install Go(v1.24)? (yes/no)"
   register: install_go
 
 - name: Download Go language
   become: true
   become_user: '{{ default_user }}'
   get_url:
-    url: https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
-    dest: '/home/{{ default_user }}/Downloads/go1.22.2.linux-amd64.tar.gz'
+    url: https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
+    dest: '/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz'
     validate_certs: true
-    checksum: sha256:5901c52b7a78002aeff14a21f93e0f064f74ce1360fce51c6ee68cd471216a17
+    checksum: sha256:3333f6ea53afa971e9078895eaa4ac7204a8c6b5c68c10e6bc9a33e8e391bdd8
   when: install_go.user_input | bool
 
 - name: Remove previous Go installation
@@ -23,7 +23,7 @@
 
 - name: Install Go
   unarchive:
-    src: '/home/{{ default_user }}/Downloads/go1.22.2.linux-amd64.tar.gz'
+    src: '/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz'
     dest: /usr/local/
     owner: root
     group: root
@@ -68,10 +68,18 @@
 - name: Install NVM
   when: install_nvm.user_input | bool
   block:
-    - name: Download NVM(v0.39.7) installation script
+    - name: Get the latest NVM version
+      set_fact:
+        nvm_latest_version: "{{ lookup('url', 'https://api.github.com/repos/nvm-sh/nvm/releases/latest') | from_json | json_query('tag_name') }}"
+
+    - name: Display NVM version to install
+      debug:
+        msg: "Installing NVM version: {{ nvm_latest_version }}"
+
+    - name: Download NVM {{ nvm_latest_version }} installation script
       get_url:
-        url: https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh
-        dest: /home/{{ default_user }}/install_nvm.sh
+        url: https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_latest_version }}/install.sh
+        dest: /hnvm.uome/{{ default_user }}/install_nvm.sh
         mode: '0755'
 
     - name: Run NVM installation script
@@ -86,14 +94,23 @@
         path: "~/install_nvm.sh"
         state: absent
 
-- name: Install Python2 check
+- name: Install Python Poetry check
   pause:
-    prompt: "Install Python2? (yes/no)"
-  register: install_python2
+    prompt: "Install Python Poetry?? (yes/no)"
+  register: install_poetry
 
-- name: Install Python2
-  apt:
-    pkg:
-      - python2
-  when: install_python2.user_input | bool
-  
+- name: Install Python Poetry
+  when: install_poetry.user_input | bool
+  block:
+
+    - name: Fetch and run Poetry installer
+      shell: curl -sSL https://install.python-poetry.org | python3 -
+      register: task
+      changed_when: "'status=changed' in task.stdout"
+
+    - name: Add Poetry to PATH in .zshrc
+      blockinfile:
+        path: "{{ ansible_env.HOME }}/.zshrc"
+        block: 'export PATH="$HOME/.local/bin:$PATH"'
+        marker: "# {mark} ANSIBLE MANAGED - Poetry PATH"
+        insertbefore: '^\# run starship'

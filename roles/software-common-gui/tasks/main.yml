@@ -16,7 +16,7 @@
   when: (install_all_optionals.user_input | bool) or
     (install_kitty.user_input | bool)
   block:
-  
+
     - name: Download Kitty installer script
       get_url:
         url: https://sw.kovidgoyal.net/kitty/installer.sh
@@ -90,42 +90,6 @@
   when: (install_all_optionals.user_input | bool) or
     (install_chromium.user_input | bool)
 
-# VSCODE INSTALL
-- name: Install Visual Studio Code check
-  pause:
-    prompt: "Install vscode (yes/no)?"
-  register: install_vscode
-  when: not install_all_optionals.user_input | bool
-
-- name: Install Visual Studio Code
-  snap:
-    name: code
-    classic: true
-  when: (install_all_optionals.user_input | bool) or
-    (install_vscode.user_input | bool)
-
-- name: Post Visual Studio Code install
-  debug:
-    msg:
-      - "To install the Ansible linter for vscode follow this guide:"
-      - "https://github.com/ansible-community/vscode-ansible/blob/4925e3393ddce2554ac346a17a04118d668a609c/doc/topics/integrate_ansible-lint_in_venv/linux.md"
-  when: (install_all_optionals.user_input | bool) or
-    (install_vscode.user_input | bool)
-
-# SPOTIFY INSTALL
-- name: Install Spotify check
-  pause:
-    prompt: "Install Spotify (yes/no)?"
-  register: install_spotify
-  when: not install_all_optionals.user_input | bool
-
-- name: Install Spotify
-  snap:
-    name: spotify
-    classic: true
-  when: (install_all_optionals.user_input | bool) or
-    (install_spotify.user_input | bool)
-
 # KEEPASSXC INSTALL
 - name: Install KeepassXC check
   pause:
@@ -134,9 +98,9 @@
   when: not install_all_optionals.user_input | bool
 
 - name: Install KeepassXC
-  snap:
-    name: keepassxc
-    classic: true
+  flatpak:
+    name: org.keepassxc.KeePassXC
+    state: present
   when: (install_all_optionals.user_input | bool) or
     (install_keepassxc.user_input | bool)
 
@@ -196,16 +160,34 @@
   when: (install_all_optionals.user_input | bool) or
     (install_yakuake.user_input | bool)
 
-# INSOMNIA INSTALL
-- name: Install Insomnia check
+# VS CODE INSTALL
+- name: Install Visual Studio Code check
   pause:
-    prompt: "Install Insomnia (yes/no)?"
-  register: install_insomnia
+    prompt: "Install Visual Studio Code (yes/no)?"
+  register: install_vscode
   when: not install_all_optionals.user_input | bool
 
-- name: Install Insomnia
-  snap:
-    name: insomnia
-    classic: true
+
+- name: Install Visual Studio Code
   when: (install_all_optionals.user_input | bool) or
-    (install_insomnia.user_input | bool)
+    (install_vscode.user_input | bool)
+  block:
+
+    - name: Run Microsoft repository and GPG key setup script
+      shell: |
+        sudo apt-get install wget gpg
+        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+        sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+        echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+        rm -f packages.microsoft.gpg
+
+    - name: Update APT cache
+      apt:
+        update_cache: yes
+
+    - name: Install Visual Studio Code
+      apt:
+        name: code
+        state: present
+
+

@@ -8,14 +8,26 @@
   become: true
   shell: chsh -s /bin/zsh "{{ default_user }}"
 
-- name: Add fix for snap apps to zprofile
-  become: true
-  blockinfile:
-    path: /etc/zsh/zprofile
-    marker: "# {mark} ANSIBLE MANAGED BLOCK fix snap apps not showing in launcher"
-    block: |
-      # fix snap apps not showing in launcher
-      emulate sh -c "source /etc/profile.d/apps-bin-path.sh"
+- name: Install Starship cross-shell prompt
+  block:
+
+    - name: Download Starship installer script
+      get_url:
+        url: https://starship.rs/install.sh
+        dest: "/home/{{ default_user }}/starship-install.sh"
+        mode: '0755'
+
+    # Let Ansible run this as root as starship will need the perm to install to /usr/local/bin
+    - name: Run Starship installer script
+      become: true
+      shell: "/home/{{default_user}}/starship-install.sh --yes"
+
+    - name: Remove downloaded installer script
+      become: true
+      become_user: "{{ default_user }}"
+      file:
+        path: "~/starship-install.sh"
+        state: absent
 
 - name: Clone Antidote repository
   become: true
@@ -24,21 +36,6 @@
     repo: https://github.com/mattmc3/antidote.git
     dest: "~/.antidote"
     depth: 1
-
-- name: Add Antidote initialisation to zshrc
-  become: true
-  become_user: "{{ default_user }}"
-  blockinfile:
-    path: "~/.zshrc"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK Add antidote initialisation to zshrc"
-    block: |
-      # source antidote
-      source ~/.antidote/antidote.zsh
-      # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
-      antidote load
-      # set prompt to powerlevel10k
-      autoload -Uz promptinit && promptinit && prompt powerlevel10k
-    create: yes
 
 - name: Create Antidote plugin file
   become: true
@@ -50,8 +47,49 @@
       # frameworks
       ohmyzsh/ohmyzsh path:lib
       ohmyzsh/ohmyzsh path:plugins/colored-man-pages
-      # prompt plugins
-      romkatv/powerlevel10k kind:fpath
       # utils
       agkozak/zsh-z
+      # completions for poetry
+      poetry
+
     create: yes
+
+- name: Write zshrc contents
+  become: true
+  become_user: "{{ default_user }}"
+  blockinfile:
+    path: "~/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Add antidote initialisation to zshrc"
+    block: |
+      # source antidote
+      source ~/.antidote/antidote.zsh
+      # initialise zsh completion
+      autoload -Uz compinit && compinit
+      # initialize plugins statically with ${ZDOTDIR:-~}/.zsh_plugins.txt
+      antidote load
+      # run starship
+      eval "$(starship init zsh)"
+    create: yes
+
+- name: Install FiraCode nerd font
+  block:
+
+    - name: Check for existing FiraCode font directory
+      stat:
+        path: '/usr/local/share/fonts/FiraCode'
+      register: font_dir
+
+    - name: Create font directory for FiraCode
+      become: true
+      file:
+        path: '/usr/local/share/fonts/FiraCode'
+        mode: 0775
+        state: directory
+
+    - name: Download and extract FiraCode
+      become: true
+      unarchive:
+        src: "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.tar.xz"
+        dest: "/usr/local/share/fonts/FiraCode"
+        remote_src: true
+      when: not font_dir.stat.exists

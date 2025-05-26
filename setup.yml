@@ -9,9 +9,6 @@
     - role: software-common-gui
       tags: gui
 
-    - role: languages
-      tags: langs
-
     - role: aliases
       tags: aliases
 
@@ -19,4 +16,9 @@
       tags: keyboard
 
     - role: zsh-antidote
-      tags: antidote
+      tags: shell
+
+    - role: languages
+      tags: langs
+      depends_on:
+        - zsh-antidote
