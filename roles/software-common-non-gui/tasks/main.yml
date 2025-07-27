@@ -12,6 +12,7 @@
       - build-essential
       - aspell
       - wordnet
+      - btop
 
 - name: Clone Tmux plugin manager
   become: yes
