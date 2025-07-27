@@ -29,6 +29,14 @@
         path: "~/starship-install.sh"
         state: absent
 
+    - name: Copy across Starship Tokyo-Night config (with some additions)
+      become: true
+      become_user: "{{ default_user }}"
+      copy:
+        src: "{{ playbook_dir }}/exports/starship.toml"
+        dest: "/home/{{ default_user }}/.config/starship.toml"
+        mode: '0644'
+
 - name: Clone Antidote repository
   become: true
   become_user: "{{ default_user }}"
