@@ -1,38 +1,34 @@
-Role Name
-=========
+# languages
 
-A brief description of the role goes here.
+Interactive installation of programming language runtimes and package managers.
 
-Requirements
-------------
+## Available Languages/Tools
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+### Go (v1.24.3)
+- Downloads and installs to `/usr/local/go`
+- Adds `GOROOT` and PATH entries to `~/.zshenv`
+- Includes SHA256 checksum verification
 
-Role Variables
---------------
+### NVM (Node Version Manager)
+- Fetches latest version from GitHub API
+- Installs to `~/.nvm`
+- Adds initialization to `~/.zshrc`
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+### Python Poetry
+- Python dependency management tool
+- Installs to `~/.local/bin`
+- Adds PATH entry to `~/.zshrc` (before Starship init)
 
-Dependencies
-------------
+## Interactive Prompts
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Each tool has an individual prompt - answer "yes" to install, "no" to skip.
 
-Example Playbook
-----------------
+## Dependencies
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Requires `zsh-antidote` role to run first (modifies Zsh config files).
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+## Usage
 
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+```bash
+ansible-playbook setup.yml --tags langs
+```

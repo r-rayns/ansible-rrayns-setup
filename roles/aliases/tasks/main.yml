@@ -1,5 +1,11 @@
 ---
 # tasks file for aliases
+- name: Ensure aspell is installed
+  apt:
+    pkg:
+      - aspell
+    state: present
+
 - name: add alias for spellcheck
   lineinfile:
     path: /home/{{ default_user }}/.zshrc

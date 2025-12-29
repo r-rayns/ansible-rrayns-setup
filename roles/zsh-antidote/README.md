@@ -1,38 +1,29 @@
-Role Name
-=========
+# zsh-antidote
 
-A brief description of the role goes here.
+Installs and configures Zsh shell with Antidote plugin manager and Starship prompt.
 
-Requirements
-------------
+## What it installs
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- **Zsh** - Z shell, set as default shell
+- **Antidote** - Fast Zsh plugin manager (static loading)
+- **Starship** - Cross-shell prompt (Tokyo-Night theme)
+- **FiraCode Nerd Font** - Programming font with ligatures and icons
 
-Role Variables
---------------
+## Configuration
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Creates the following files:
+- `~/.zshrc` - Sources Antidote, initializes plugins, runs Starship
+- `~/.zsh_plugins.txt` - Plugin declarations (Oh My Zsh lib, colored-man-pages, zsh-z, poetry completion)
+- `~/.config/starship.toml` - Custom Tokyo-Night themed prompt config
 
-Dependencies
-------------
+## Plugins Included
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+- Oh My Zsh library and colored man pages
+- `zsh-z` - Jump to frequent directories
+- Poetry completion support
 
-Example Playbook
-----------------
+## Usage
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
-
-License
--------
-
-BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+```bash
+ansible-playbook setup.yml --tags shell
+```
