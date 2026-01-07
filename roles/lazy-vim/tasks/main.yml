@@ -1,0 +1,98 @@
+---
+# tasks file for lazy-vim
+
+- name: Download latest neovim AppImage
+  get_url:
+    url: https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+    dest: /tmp/nvim-linux-x86_64.appimage
+    mode: "0755"
+  become: true
+
+- name: Create /opt/nvim directory
+  file:
+    path: /opt/nvim
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Move AppImage to /opt/nvim/nvim
+  command: mv /tmp/nvim-linux-x86_64.appimage /opt/nvim/nvim
+  args:
+    creates: /opt/nvim/nvim
+  become: true
+
+- name: Add /opt/nvim to PATH in .zshenv
+  lineinfile:
+    path: /home/{{ default_user }}/.zshenv
+    line: 'export PATH="$PATH:/opt/nvim/"'
+    create: true
+    mode: "0644"
+  become: true
+  become_user: "{{ default_user }}"
+
+- name: Install ripgrep
+  apt:
+    name: ripgrep
+    state: present
+    update_cache: true
+  become: true
+
+- name: Check if nvim config already exists
+  stat:
+    path: "/home/{{ default_user }}/.config/nvim"
+  register: nvim_config_check
+  become: true
+  become_user: "{{ default_user }}"
+
+- name: Prompt to reinstall LazyVim
+  pause:
+    prompt: "LazyVim already installed. Reinstall from scratch? Your current config will be backed up with timestamp. (yes/no)"
+  register: reinstall_lazyvim
+  when: nvim_config_check.stat.exists
+
+- name: Generate timestamp for backups
+  set_fact:
+    backup_timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Check if nvim directories exist
+  stat:
+    path: "/home/{{ default_user }}/{{ item }}"
+  register: nvim_dirs
+  become: true
+  become_user: "{{ default_user }}"
+  loop:
+    - .config/nvim
+    - .local/share/nvim
+    - .local/state/nvim
+    - .cache/nvim
+
+- name: Backup existing nvim directories with timestamp
+  command: mv /home/{{ default_user }}/{{ item.item }} /home/{{ default_user }}/{{ item.item }}.bak.{{ backup_timestamp }}
+  when:
+    - item.stat.exists
+    - not nvim_config_check.stat.exists or (reinstall_lazyvim.user_input | default('no') | bool)
+  changed_when: true # When this task runs it will always make a change
+  become: true
+  become_user: "{{ default_user }}"
+  loop: "{{ nvim_dirs.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Clone LazyVim starter
+  git:
+    repo: https://github.com/LazyVim/starter
+    dest: "/home/{{ default_user }}/.config/nvim"
+    version: main
+    clone: true
+    update: false
+  when: not nvim_config_check.stat.exists or (reinstall_lazyvim.user_input | default('no') | bool)
+  become: true
+  become_user: "{{ default_user }}"
+
+- name: Remove .git folder from LazyVim config
+  file:
+    path: "/home/{{ default_user }}/.config/nvim/.git"
+    state: absent
+  when: not nvim_config_check.stat.exists or (reinstall_lazyvim.user_input | default('no') | bool)
+  become: true
+  become_user: "{{ default_user }}"

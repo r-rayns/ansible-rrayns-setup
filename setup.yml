@@ -22,3 +22,8 @@
       tags: langs
       depends_on:
         - zsh-antidote
+
+    - role: lazy-vim
+      tags: vim
+      depends_on:
+        - zsh-antidote
