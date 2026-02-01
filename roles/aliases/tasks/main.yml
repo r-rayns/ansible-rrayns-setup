@@ -10,5 +10,10 @@
   lineinfile:
     path: /home/{{ default_user }}/.zshrc
     line: 'alias spck=''function _spck(){ echo "$1" | aspell -a };_spck'''
-    create: yes
+    create: true
 
+- name: add alias for toggling mac keyboard layout
+  lineinfile:
+    path: /home/{{ default_user }}/.zshrc
+    line: 'alias mackeys=''if systemctl is-active keyd >/dev/null; then sudo systemctl stop keyd && echo -e "\e[34mmac keys off\e[0m"; else sudo systemctl start keyd && echo -e "\e[32mmac keys on\e[0m"; fi'''
+    create: true

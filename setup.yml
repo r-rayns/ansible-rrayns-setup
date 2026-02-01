@@ -15,6 +15,9 @@
     - role: keychron-k2
       tags: keyboard
 
+    - role: macos-key-layout
+      tags: mac-keybindings
+
     - role: zsh-antidote
       tags: shell
 
