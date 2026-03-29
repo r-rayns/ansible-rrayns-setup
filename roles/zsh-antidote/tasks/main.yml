@@ -10,12 +10,11 @@
 
 - name: Install Starship cross-shell prompt
   block:
-
     - name: Download Starship installer script
       get_url:
         url: https://starship.rs/install.sh
         dest: "/home/{{ default_user }}/starship-install.sh"
-        mode: '0755'
+        mode: "0755"
 
     # Let Ansible run this as root as starship will need the perm to install to /usr/local/bin
     - name: Run Starship installer script
@@ -35,7 +34,7 @@
       copy:
         src: "{{ playbook_dir }}/exports/starship.toml"
         dest: "/home/{{ default_user }}/.config/starship.toml"
-        mode: '0644'
+        mode: "0644"
 
 - name: Clone Antidote repository
   become: true
@@ -57,8 +56,6 @@
       ohmyzsh/ohmyzsh path:plugins/colored-man-pages
       # utils
       agkozak/zsh-z
-      # completions for poetry
-      poetry
 
     create: yes
 
@@ -81,16 +78,15 @@
 
 - name: Install FiraCode nerd font
   block:
-
     - name: Check for existing FiraCode font directory
       stat:
-        path: '/usr/local/share/fonts/FiraCode'
+        path: "/usr/local/share/fonts/FiraCode"
       register: font_dir
 
     - name: Create font directory for FiraCode
       become: true
       file:
-        path: '/usr/local/share/fonts/FiraCode'
+        path: "/usr/local/share/fonts/FiraCode"
         mode: 0775
         state: directory
 

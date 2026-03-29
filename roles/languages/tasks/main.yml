@@ -7,10 +7,10 @@
 
 - name: Download Go language
   become: true
-  become_user: '{{ default_user }}'
+  become_user: "{{ default_user }}"
   get_url:
     url: https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
-    dest: '/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz'
+    dest: "/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz"
     validate_certs: true
     checksum: sha256:3333f6ea53afa971e9078895eaa4ac7204a8c6b5c68c10e6bc9a33e8e391bdd8
   when: install_go.user_input | bool
@@ -23,7 +23,7 @@
 
 - name: Install Go
   unarchive:
-    src: '/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz'
+    src: "/home/{{ default_user }}/Downloads/go1.24.3.linux-amd64.tar.gz"
     dest: /usr/local/
     owner: root
     group: root
@@ -31,10 +31,10 @@
 
 - name: Check for GOROOT in .zshenv
   become: true
-  become_user: '{{ default_user }}'
+  become_user: "{{ default_user }}"
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
-    line: 'export GOROOT'
+    line: "export GOROOT"
     state: present
     create: yes
   check_mode: yes
@@ -43,23 +43,23 @@
 
 - name: Add GOROOT to .zshenv
   become: true
-  become_user: '{{ default_user }}'
+  become_user: "{{ default_user }}"
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
-    line: 'export GOROOT=/usr/local/go'
+    line: "export GOROOT=/usr/local/go"
     create: yes
-  when: (install_go.user_input | bool) and 
+  when: (install_go.user_input | bool) and
     (not goroot_present | bool)
 
 - name: Add GOROOT to $PATH
   become: true
-  become_user: '{{ default_user }}'
+  become_user: "{{ default_user }}"
   lineinfile:
     path: /home/{{ default_user }}/.zshenv
-    line: 'export PATH=$PATH:$GOROOT/bin'
-  when: (install_go.user_input | bool) and 
+    line: "export PATH=$PATH:$GOROOT/bin"
+  when: (install_go.user_input | bool) and
     (not goroot_present | bool)
-  
+
 - name: Install Node Version Manager (NVM) check
   pause:
     prompt: "Install Node Version Manager? (yes/no)"
@@ -80,7 +80,7 @@
       get_url:
         url: https://raw.githubusercontent.com/nvm-sh/nvm/{{ nvm_latest_version }}/install.sh
         dest: /home/{{ default_user }}/install_nvm.sh
-        mode: '0755'
+        mode: "0755"
 
     - name: Run NVM installation script
       become: true
@@ -93,24 +93,3 @@
       file:
         path: "~/install_nvm.sh"
         state: absent
-
-- name: Install Python Poetry check
-  pause:
-    prompt: "Install Python Poetry?? (yes/no)"
-  register: install_poetry
-
-- name: Install Python Poetry
-  when: install_poetry.user_input | bool
-  block:
-
-    - name: Fetch and run Poetry installer
-      shell: curl -sSL https://install.python-poetry.org | python3 -
-      register: task
-      changed_when: "'status=changed' in task.stdout"
-
-    - name: Add Poetry to PATH in .zshrc
-      blockinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        block: 'export PATH="$HOME/.local/bin:$PATH"'
-        marker: "# {mark} ANSIBLE MANAGED - Poetry PATH"
-        insertbefore: '^\# run starship'
